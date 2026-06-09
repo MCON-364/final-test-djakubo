@@ -126,6 +126,7 @@ public class TelemetryProcessor {
         if(totalProcessed.get()==0){
             return new DoubleSummaryStatistics();
         }
-        return processedEvents.stream().mapToDouble(TelemetryEvent::metric).summaryStatistics();
+        DoubleSummaryStatistics stats = processedEvents.stream().mapToDouble(TelemetryEvent::metric).summaryStatistics();
+        return stats;
     }
 }
