@@ -2,6 +2,8 @@ package edu.touro.las.mcon364.final_test;
 
 import java.util.Collections;
 import java.util.DoubleSummaryStatistics;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -126,7 +128,7 @@ public class TelemetryProcessor {
         if(totalProcessed.get()==0){
             return new DoubleSummaryStatistics();
         }
-        DoubleSummaryStatistics stats = processedEvents.stream().mapToDouble(TelemetryEvent::metric).summaryStatistics();
-        return stats;
+        List<TelemetryEvent> processedEventsCopy = List.copyOf(processedEvents);
+        return processedEventsCopy.stream().mapToDouble(TelemetryEvent::metric).summaryStatistics();
     }
 }
