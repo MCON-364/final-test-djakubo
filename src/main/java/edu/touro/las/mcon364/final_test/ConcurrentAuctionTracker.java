@@ -30,8 +30,9 @@ public class ConcurrentAuctionTracker {
 
     //TODO - Initialize thread-safe sorted Set implementation to store bids in descending order by amount.
     //Uncomment line below and choose the appropriate concurrent collection to store BidEntry objects sorted by amount.
-    //private final Set<BidEntry> bids;
+    private final ConcurrentSkipListSet<BidEntry> bids= new ConcurrentSkipListSet<>();
     //TODO - Initialize a thread-safe counter to track total bid submissions and call it totalBids.
+    private final AtomicInteger totalBids = new AtomicInteger(0);
 
 
     /**
@@ -41,6 +42,8 @@ public class ConcurrentAuctionTracker {
      */
     public void submitBid(BidEntry entry) {
         //TODO - implement this method
+        bids.add(entry);
+        totalBids.getAndIncrement();
     }
 
     /**
@@ -51,7 +54,10 @@ public class ConcurrentAuctionTracker {
      */
     public List<BidEntry> getTopN(int n) {
         //TODO - implement this method
-        return null;
+        return List.copyOf(bids.stream()
+                .sorted()
+                .limit(n)
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -59,7 +65,7 @@ public class ConcurrentAuctionTracker {
      */
     public int getTotalBids() {
         //TODO - implement this method
-        return 0;
+        return totalBids.get();
     }
 
     /**
@@ -74,6 +80,18 @@ public class ConcurrentAuctionTracker {
     public void runSimulation(List<String> bidders, int bidsEach)
             throws InterruptedException {
         //TODO - implement this method
+        ExecutorService pool = Executors.newFixedThreadPool(bidders.size());
+        Random random = new Random();
+        for(String bidder: bidders) {
+            pool.submit(() -> {
+                for (int i = 0; i < bidsEach; i++) {
+                    BidEntry entry = new BidEntry(bidder, random.nextInt(1000000), System.currentTimeMillis());
+                    submitBid(entry);
+                }
+            });
+        }
+        pool.shutdown();
+        pool.awaitTermination(10, TimeUnit.SECONDS);
     }
 }
 
